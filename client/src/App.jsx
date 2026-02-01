@@ -10,7 +10,7 @@ const App = () => {
   const { authUser } = useContext(AuthContext)
   
   return (
-    <div className="min-h-screen bg-[url('./bgImage.svg')] bg-cover bg-fixed bg-center">  {/* ✅ Improved background */}
+    <div className="min-h-screen bg-[url(/bgImage.svg)] bg-cover bg-fixed bg-center">  {/* ✅ Improved background */}
       <Toaster 
         position="top-right"  // ✅ Added position
         toastOptions={{
