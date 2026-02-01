@@ -11,21 +11,25 @@ import { Server } from "socket.io";
 const app = express();
 const server = http.createServer(app);
 
-// Initialize socket.io server
+// Initialize socket.io server with proper CORS
 export const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: { 
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 
 // Store online users
 export const userSocketMap = {}; // {userId: socketId}
 
 // Socket.io connection handler
-io.on("connection", (socket) => {  // ✅ FIXED: lowercase "connection"
-    const userId = socket.handshake.query.userId;  // ✅ FIXED: lowercase "socket"
+io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
     console.log("User Connected:", userId, "Socket ID:", socket.id);
 
     if(userId) {
-        // ✅ Convert to string and store
+        // Convert to string and store
         userSocketMap[userId.toString()] = socket.id;
         console.log("User socket map updated:", userSocketMap);
     }
@@ -33,7 +37,7 @@ io.on("connection", (socket) => {  // ✅ FIXED: lowercase "connection"
     // Emit online users to all connected clients 
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-    socket.on("disconnect", () => {  // ✅ FIXED: lowercase "disconnect"
+    socket.on("disconnect", () => {
         console.log("User Disconnected:", userId, "Socket ID:", socket.id);
         
         // Find and remove user from map
@@ -50,7 +54,10 @@ io.on("connection", (socket) => {  // ✅ FIXED: lowercase "connection"
 
 // Middleware setup 
 app.use(express.json({ limit: "4mb" }));
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true
+}));
 
 // Routes Setup
 app.use("/api/status", (req, res) => res.send("Server is Live"));
